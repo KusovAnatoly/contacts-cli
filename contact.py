@@ -4,9 +4,9 @@ import math
 from os import path 
 
 
-__file_name = "contacts.json"
+_file_name = "contacts.json"
 '''
-Название файла в котором хранится 
+Название файла в котором хранятся контакты
 '''
 
 class Contact:
@@ -52,9 +52,9 @@ class Contact:
         self.id = 1
 
         # Проверка на существование файла
-        if path.isfile('contacts.json'):
+        if path.isfile(_file_name):
             # Инкремент уникального идентификатора
-            with open(__file_name, "r") as f:
+            with open(_file_name, "r") as f:
                 row_count = sum(1 for line in f)
                 self.id = row_count + 1
         
@@ -70,7 +70,7 @@ class Contact:
             }
         
         # Запись нового файла
-        with open(__file_name, "a") as f:
+        with open(_file_name, "a") as f:
             json.dump(new_record, f)
             f.write('\n')
 
@@ -79,13 +79,15 @@ class Contact:
 
         
         # Проверяет существует ли файл
-        if not(path.isfile('contacts.json')):
-            print('Контактов нет. Добавьте свой первый контакт!')
+        if not path.isfile(_file_name):
+            print('Контактов нет. Добавьте первый контакт.')
             return
 
+        contacts = []
         # Считывание файла и загрузка JSON-строк в качестве список словарей
-        with open(__file_name, "r") as f:
-            contacts = [json.loads(line) for line in f]
+        with open(_file_name, "r") as f:
+            for line in f:
+                contacts.append(json.loads(line))
         
         # Поиск индекса контакта с таким же ID как и у объекта
         index = -1
@@ -100,12 +102,12 @@ class Contact:
             contacts[index] = vars(self)
         
         # Запись обновленных данных в файл
-        with open(__file_name, "w") as f:
+        with open(_file_name, "w") as f:
             for contact in contacts:
                 json.dump(contact, f)
                 f.write('\n')
 
-def get(id:int):
+def get(id):
     '''
     Считывает из файла конкретную запись по ID
 
@@ -113,11 +115,11 @@ def get(id:int):
         id (int): Идентификатор записи в файле
     '''
 
-    if not(path.isfile('contacts.json')):        
-        print('Контактов нет. Добавьте свой первый контакт!')
+    if not(path.isfile(_file_name)):        
+        print('Контактов нет. Добавьте первый контакт.')
         return
 
-    with open(__file_name, "r") as f:
+    with open(_file_name, "r") as f:
         for line in f:
             json_obj = json.loads(line)
             if json_obj['id'] == id: # check if the id matches
@@ -127,21 +129,24 @@ def read_all():
     '''
     Считывает все записи из файла
     '''
-    data = []
+
+    contacts = []
     
     # Проверяет существует ли файл
-    if not(path.isfile('contacts.json')):
-        print('Контактов нет. Добавьте свой первый контакт!')
+    if not path.isfile(_file_name):
+        print('Контактов нет. Добавьте первый контакт.')
         return
 
-    with open(__file_name, "r") as f:
-        for line in f:
-            json_obj = json.loads(line)
-            data.append(json_obj.values())
+    try:
+        with open(_file_name, "r") as f:
+            for line in f:
+                json_obj = json.loads(line)
+                contacts.append(json_obj.values())
+    except json.JSONDecodeError:
+        print("Ошибка при десериализации JSON-данных. Строка была пропущена")
 
-    
-    table_data = [['ID', 'First Name', 'Middle Name', 'Last Name', 'Organisation', 'Personal Phone', 'Work Phone']]
-    table_data.extend(data)
+    table_data = [['ID', 'Имя', 'Отчество', 'Фамилия', 'Организация', 'Личный телефон', 'Рабочий телефон']]
+    table_data.extend(contacts)
     table = AsciiTable(table_data, "Контакты")
     print(table.table)
 
@@ -153,7 +158,7 @@ def read(page_number):
         page_number (int): Номер страницы
     '''
 
-    if not(path.isfile('contacts.json')):        
+    if not(path.isfile(_file_name)):        
         print('Контактов нет. Добавьте свой первый контакт!')
         return
 
@@ -161,7 +166,7 @@ def read(page_number):
 
     data = []
 
-    with open(__file_name, "r") as f:# Skip the first line
+    with open(_file_name, "r") as f:# Skip the first line
         for line in f:
             json_obj = json.loads(line)
             data.append(json_obj.values())    
@@ -169,7 +174,7 @@ def read(page_number):
     # Расчет количества всех страниц
     total_pages = (len(data) + page_size - 1) // page_size
     
-    page_data = [['ID', 'First Name', 'Middle Name', 'Last Name', 'Organisation', 'Personal Phone', 'Work Phone']]
+    page_data = [['ID', 'Имя', 'Отчество', 'Фамилия', 'Организация', 'Личный телефон', 'Рабочий телефон']]
 
     # Проверка пользовательского ввода страницы
     page_number = int(page_number)
@@ -183,7 +188,7 @@ def read(page_number):
         table = AsciiTable(page_data, f"Контакты ({page_number} из {total_pages} стр.)")
         print(table.table)
     else:
-        print(f"Введите значение от {1} до {total_pages}")
+        print(f"Ошибка: такой страницы нет. Введите значение от {1} до {total_pages}")
 
 
 
@@ -203,16 +208,16 @@ def search(first_name, id=0, middle_name="", last_name="", personal_phone="", wo
     
     data = []
     
-    if not(path.isfile('contacts.json')):        
+    if not(path.isfile(_file_name)):        
         print('Контактов нет. Добавьте свой первый контакт!')
         return
 
-    with open(__file_name, "r") as f:
+    with open(_file_name, "r") as f:
         for line in f:
             json_obj = json.loads(line)
             data.append(json_obj.values())
 
-    table_data = [['ID', 'First Name', 'Middle Name', 'Last Name', 'Organisation', 'Personal Phone', 'Work Phone']]
+    table_data = [['ID', 'Имя', 'Отчество', 'Фамилия', 'Организация', 'Личный телефон', 'Рабочий телефон']]
 
     # Loop over the list of lists and check if the value is in each sublist
     for i, sublist in enumerate(data):

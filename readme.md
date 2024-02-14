@@ -27,7 +27,7 @@ Contact CLI - просто CLI-приложение, которое позвол
 ## Примеры команд
 
 ```
-python app.py add -n Ivan -p '+7 (xxx) xxx-xx-xx'
+python app.py add -n Ivan -pp '+7 (xxx) xxx-xx-xx'
 ```
 
 ```
@@ -39,7 +39,7 @@ python app.py search -n Ulberto
 ```
 
 ```
-python app.py show --p 10
+python app.py show --pn 10
 ```
 
 ```
