@@ -1,10 +1,5 @@
 import argparse
-import json
-import sys
-from contact import read_all
-from contact import read
-from contact import search
-from contact import Contact
+from contact_manager import ContactManager
 
 def main():
     contact_manager = ContactManager()
@@ -13,12 +8,12 @@ def main():
     parser = argparse.ArgumentParser(description="Простое CLI-приложение для управления контактами")
     # Объявление субпарсера с командами
     subparsers = parser.add_subparsers(dest="command", help="Доступные команды")
+    # Передача парсера команд
+    contact_manager.add_command_parsers(subparsers)
     # Парсинг аргументов
     args = parser.parse_args()
-    # Передача аргументов командной строки
-    contact_manager.execute_command(args)
     # Выполнение команд
-    contact_manager.add_command_parsers(subparsers)
+    contact_manager.execute_command(args)
 
 if __name__ == "__main__":
     main()

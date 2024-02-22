@@ -36,20 +36,20 @@ class Contact:
             json.dump(new_record, f)
             f.write('\n')
 
-    def update(self, props):
+    def update(self, args):
         '''
         Обновляет контакт
         Args:
-            props: данные для обновления
+            args: данные для обновления
         '''
         # Загрузка существующих контактов
         contacts = self._read_contacts()
 
         # Найти контакт для редактирования
         for contact in contacts:
-            if contact['id'] == props.id:
+            if contact['id'] == args.id:
                 # Обновить поля контакта с ненулевыми значениями
-                for key, value in vars(props).items():
+                for key, value in vars(args).items():
                     if value is not None:
                         contact[key] = value
                 break
@@ -73,8 +73,11 @@ class Contact:
         if path.isfile(_file_name):
             with open(_file_name, "r") as f:
                 for line in f:
-                    contacts.append(json.loads(line))
-        return contacts
+                    obj = json.loads(line)
+                    contacts.append(obj.values())
+                return contacts
+        else:
+            print('Контактов нет')
 
     @staticmethod
     def _generate_id():

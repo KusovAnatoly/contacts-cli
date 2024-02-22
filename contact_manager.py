@@ -1,3 +1,4 @@
+from terminaltables import AsciiTable
 import sys
 from contact import Contact
 
@@ -51,23 +52,31 @@ class ContactManager:
         contact.update(args)
         print(f"Конакт \"{contact.first_name}\" был отредактирован")
 
-    def list_contacts(self, args):
+    def list_contacts(self):
         contacts = Contact.read_all()
         if contacts:
-            for contact in contacts:
-                print(contact)
+            contacts.insert(0, ['ID', 'Имя', 'Отчество', 'Фамилия', 'Организация', 'Личный телефон', 'Рабочий телефон'])
+            table = AsciiTable(contacts, f"Контакты")
+            print(table.table)
         else:
-            print("Контактов не найдено")
+            print(f"Ошибка: такой страницы нет. Введите значение от {1} до {total_pages}")
+
+    def list_contacts_by_page(self, page_number):
+        contacts = Contact.read(page_number)
+        contacts.insert(0, ['ID', 'Имя', 'Отчество', 'Фамилия', 'Организация', 'Личный телефон', 'Рабочий телефон'])
+        if contacts:
+            table = AsciiTable(contacts)
+            print(table.table)
+        else:
+            print(f"Ошибка: такой страницы нет.")
 
     def search_contacts(self, args):
-        search_params = vars(args)
-        del search_params['command']
-        results = Contact.search(**search_params)
-        if results:
-            for contact in results:
-                print(contact)
-        else:
-            print("Такой контакт не найден")
+        contact = Contact()
+        contact.search(args)
+        table_data = [['ID', 'Имя', 'Отчество', 'Фамилия', 'Организация', 'Личный телефон', 'Рабочий телефон']]
+        table_data.extend(contacts)
+        table = AsciiTable(table_data, "Поиск контактов")
+        print(table.table)
     
     def execute_command(self, args):
         '''
@@ -80,7 +89,10 @@ class ContactManager:
         elif args.command == "edit":
             self.edit_contact(args)
         elif args.command == "list":
-            self.list_contacts(args)
+            if args.all:
+                self.list_contacts()
+            elif args.page_number:
+                self.list_contacts_by_page(args.page_number)
         elif args.command == "search":
             self.search_contacts(args)
         else:
