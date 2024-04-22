@@ -39,9 +39,9 @@ python app.py search -n Ulberto
 ```
 
 ```
-python app.py show --pn 10
+python app.py list --pn 10
 ```
 
 ```
-python app.py show -a
+python app.py list -a
 ```
